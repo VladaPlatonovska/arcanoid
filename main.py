@@ -1,4 +1,4 @@
-import pygame
+import pgzrun
 
 WIDTH = 600
 HEIGHT = 800
@@ -12,4 +12,4 @@ def update(dt):
     pass
 
 
-pygame.go()
+pgzrun.go()
