@@ -1,3 +1,4 @@
+import random
 import pgzrun
 import pygame
 
@@ -52,17 +53,60 @@ class Paddle:
 paddle = Paddle()
 
 
+class Ball:
+
+    def __init__(self):
+        self.goal = Vector(0, 0)
+        self.radius = 10
+        self.x = int(WIDTH / 2 - self.radius / 2)
+        self.y = int(HEIGHT - self.radius * 4)
+        self.speedX = 3
+        self.speedY = 3
+
+        # ball_rect = int(self.radius * 2 ** 0.5)
+        # self.ball = pygame.Rect(rnd(ball_rect, WIDTH - ball_rect), HEIGHT // 2, ball_rect, ball_rect)
+        # self.x, self.y = 300, 350
+        self.ball = pygame.Rect(self.x, self.y, self.radius, self.speedX)
+
+
+
+    def draw(self):
+        pygame.draw.circle(surface, 'white', (self.x, self.y), self.radius)
+
+    # pygame.draw.circle(screen, (255, 255, 0), (random_x, falling_y), random_size)
+    def paddle_left_collision(self):
+        if paddle.x - paddle.width <= self.x <= paddle.x + paddle.width and paddle.y <= self.y <= paddle.y + paddle.height:
+            # self.speedX *= random.choice([-1, 1])
+            self.speedY *= random.choice([-1, 1])
+
+
+    def update(self, dt):
+        self.x -= self.speedX
+        self.y -= self.speedY
+        if self.x >= WIDTH or self.x <= 0:
+            self.speedX *= -1
+        if self.y >= HEIGHT or self.y <= 0:
+            self.speedY *= -1
+
+
+ball = Ball()
+
+
+
 def on_mouse_move(pos):
     paddle.where_to(pos)
+    ball.paddle_left_collision()
 
 
 def draw():
     screen.clear()
     paddle.draw()
+    ball.draw()
 
 
 def update(dt):
     paddle.update(dt)
+    ball.update(dt)
 
 
 pgzrun.go()
