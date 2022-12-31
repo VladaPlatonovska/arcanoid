@@ -74,8 +74,8 @@ class Ball:
         pygame.draw.circle(surface, 'white', (self.x, self.y), self.radius)
 
     # pygame.draw.circle(screen, (255, 255, 0), (random_x, falling_y), random_size)
-    def paddle_left_collision(self):
-        if paddle.x - paddle.width <= self.x <= paddle.x + paddle.width and paddle.y <= self.y <= paddle.y + paddle.height:
+    def paddle_collision(self):
+        if paddle.x - self.radius <= self.x <= paddle.x + paddle.width and self.y > paddle.y - self.radius:
             # self.speedX *= random.choice([-1, 1])
             self.speedY *= random.choice([-1, 1])
 
@@ -95,7 +95,6 @@ ball = Ball()
 
 def on_mouse_move(pos):
     paddle.where_to(pos)
-    ball.paddle_left_collision()
 
 
 def draw():
@@ -107,6 +106,7 @@ def draw():
 def update(dt):
     paddle.update(dt)
     ball.update(dt)
+    ball.paddle_collision()
 
 
 pgzrun.go()
