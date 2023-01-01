@@ -62,10 +62,6 @@ class Ball:
         self.y = int(HEIGHT - self.radius * 4)
         self.speedX = 3
         self.speedY = 3
-
-        # ball_rect = int(self.radius * 2 ** 0.5)
-        # self.ball = pygame.Rect(rnd(ball_rect, WIDTH - ball_rect), HEIGHT // 2, ball_rect, ball_rect)
-        # self.x, self.y = 300, 350
         self.ball = pygame.Rect(self.x, self.y, self.radius, self.speedX)
 
 
@@ -73,10 +69,9 @@ class Ball:
     def draw(self):
         pygame.draw.circle(surface, 'white', (self.x, self.y), self.radius)
 
-    # pygame.draw.circle(screen, (255, 255, 0), (random_x, falling_y), random_size)
+
     def paddle_collision(self):
         if paddle.x - self.radius <= self.x <= paddle.x + paddle.width and self.y > paddle.y - self.radius:
-            # self.speedX *= random.choice([-1, 1])
             self.speedY *= random.choice([-1, 1])
 
 
