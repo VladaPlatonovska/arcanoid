@@ -128,16 +128,26 @@ color_obstacles = ['yellow', 'orange', 'red']
 
 
 class Hearts:
-    def __init__(self):
-        self.actor = Actor("heart", center=(10, 10))
+    def __init__(self, x, y):
+        self.actor = Actor("heart", center=(x, y))
 
 
     def draw(self):
         self.actor.draw()
 
+    def PlaceHeart(self, x, y):
+        self.actor.width = x
+        self.actor.height = y
 
-hearts = Hearts()
 
+hearts = []
+for i in range(3):
+    if i == 0:
+        hearts.append(Hearts(15, 20))
+    if i == 1:
+        hearts.append(Hearts(45, 20))
+    if i == 2:
+        hearts.append(Hearts(75, 20))
 
 def add_obstacles(color, obs, row):
     for obs_num in range(21):
@@ -154,7 +164,8 @@ def draw():
     screen.clear()
     paddle.draw()
     ball.draw()
-    hearts.draw()
+    for HEART in hearts:
+        HEART.draw()
     for obstacle in obstacles:
         obstacle.draw()
 
