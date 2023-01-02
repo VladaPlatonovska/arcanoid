@@ -1,6 +1,8 @@
 import math
 import random
 import pgzrun
+
+from pgzero.actor import Actor
 import pygame
 
 WIDTH = 600
@@ -109,13 +111,13 @@ class Obstacle:
     #     return distance < 20
 
     def get_strength(self):
-        if self.y == 20:
+        if self.y == 60:
             self.strength = 3
             self.color = 'red'
-        elif self.y == 55:
+        elif self.y == 95:
             self.strength = 2
             self.color = 'orange'
-        elif self.y == 90:
+        elif self.y == 130:
             self.strength = 1
             self.color = 'yellow'
 
@@ -123,6 +125,18 @@ class Obstacle:
 ball = Ball()
 obstacles = []
 color_obstacles = ['yellow', 'orange', 'red']
+
+
+class Hearts:
+    def __init__(self):
+        self.actor = Actor("heart", center=(10, 10))
+
+
+    def draw(self):
+        self.actor.draw()
+
+
+hearts = Hearts()
 
 
 def add_obstacles(color, obs, row):
@@ -140,6 +154,7 @@ def draw():
     screen.clear()
     paddle.draw()
     ball.draw()
+    hearts.draw()
     for obstacle in obstacles:
         obstacle.draw()
 
@@ -161,7 +176,7 @@ def update(dt):
             ball.speedX *= -1  # ????
 
 
-row_vector = Vector(20, 20)
+row_vector = Vector(20, 60)
 for colour in color_obstacles:
     add_obstacles(colour, obstacles, row_vector)
     row_vector += Vector(0, 35)
