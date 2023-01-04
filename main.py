@@ -1,7 +1,7 @@
 import math
 import random
 import pgzrun
-
+import time
 from pgzero.actor import Actor
 import pygame
 
@@ -33,7 +33,7 @@ class Paddle:
         self.goal = Vector(0, 0)
         self.height = 15
         self.width = 120
-        self.x = int(WIDTH/2 - self.width/2)
+        self.x = int(WIDTH / 2 - self.width / 2)
         # the rectangle x position is the top left point of the rectangle
         self.y = int(HEIGHT - self.height * 2)  # so it isn't at the very bottom
         self.rectangle = pygame.Rect(self.x, self.y, self.width, self.height)
@@ -72,16 +72,12 @@ class Ball:
 
         self.ball = pygame.Rect(self.x, self.y, self.radius, self.speedX)
 
-
-
     def draw(self):
         pygame.draw.circle(surface, 'white', (self.x, self.y), self.radius)
-
 
     def paddle_collision(self):
         if paddle.x - self.radius <= self.x <= paddle.x + paddle.width and self.y >= paddle.y - self.radius:
             self.speedY *= random.choice([-1, 1])
-
 
     def update(self, dt):
         self.x -= self.speedX
@@ -91,6 +87,17 @@ class Ball:
             self.speedX *= -1
         if self.y >= HEIGHT or self.y <= 0:
             self.speedY *= -1
+
+    def check_ball_fall(self, dt):
+        if ball.y == 390:
+            hearts.pop()
+            self.speedY *= -1
+            self.x = int(WIDTH / 2 - self.radius / 2)
+            self.y = int(HEIGHT - self.radius * 4)
+            self.x -= self.speedX
+            self.y -= self.speedY
+            self.position = Vector(self.x, self.y)
+            time.sleep(1)
 
 
 class Obstacle:
@@ -131,11 +138,10 @@ class Hearts:
     def __init__(self, x, y):
         self.actor = Actor("heart", center=(x, y))
 
-
     def draw(self):
         self.actor.draw()
 
-    def PlaceHeart(self, x, y):
+    def place_heart(self, x, y):
         self.actor.width = x
         self.actor.height = y
 
@@ -148,6 +154,7 @@ for i in range(3):
         hearts.append(Hearts(45, 20))
     if i == 2:
         hearts.append(Hearts(75, 20))
+
 
 def add_obstacles(color, obs, row):
     for obs_num in range(21):
@@ -170,10 +177,43 @@ def draw():
         obstacle.draw()
 
 
+white = (255, 255, 255)
+
+
+def text_objects(text, font):
+    text_surface = font.render(text, True, white)
+    return text_surface, text_surface.get_rect()
+
+
+def message_display(text):
+    large_text = pygame.font.Font('freesansbold.ttf', 115)
+    text_surf, text_rect = text_objects(text, large_text)
+    text_rect.center = ((WIDTH / 2), (HEIGHT / 2))
+    surface.blit(text_surf, text_rect)
+    pygame.display.update()
+    time.sleep(2)
+
+
+def check_win():
+    if len(obstacles) == 0 and len(hearts) != 0:
+        message_display("You Win!")
+        quit()
+    if len(hearts) == 0:
+        # font2 = pygame.font.SysFont('didot.ttc', 72)
+        # img2 = font2.render('You Lose', True, white)
+        # surface.blit(img2, (200, 200))
+        # pygame.display.update()
+        # time.sleep(2)
+        message_display("You Lose!")
+        quit()
+
+
 def update(dt):
     paddle.update(dt)
     ball.update(dt)
     ball.paddle_collision()
+    ball.check_ball_fall(dt)
+    check_win()
     for obstacle in obstacles:
         distance = (ball.position - obstacle.position).magnitude()
         if distance < 25:
@@ -194,6 +234,5 @@ for colour in color_obstacles:
 
 for obst in obstacles:
     obst.get_strength()
-
 
 pgzrun.go()
