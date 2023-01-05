@@ -77,7 +77,7 @@ class Ball:
 
     def paddle_collision(self):
         if paddle.x - self.radius <= self.x <= paddle.x + paddle.width and self.y >= paddle.y - self.radius:
-            self.speedY *= random.choice([-1, 1])
+            self.speedY *= -1
 
     def update(self, dt):
         self.x -= self.speedX
@@ -100,6 +100,36 @@ class Ball:
             time.sleep(1)
 
 
+class RectObstacle:
+    def __init__(self, vector: Vector, color):
+        self.x = vector.x
+        self.y = vector.y
+        self.position = vector
+        self.color = color
+        self.width = 50
+        self.height = 15
+        self.strength = 0
+        self.rectangle = pygame.Rect(self.x, self.y, self.width, self.height)
+
+    def draw(self):
+        pygame.draw.rect(surface, self.color, self.rectangle)
+
+    def get_strength(self):
+        if self.y == 45:
+            self.strength = 3
+            self.color = color_obstacles[2]
+        # elif self.y == 115:
+        #     self.strength = 2
+        #     self.color = color_obstacles[1]
+        elif self.y == 170:
+            self.strength = 1
+            self.color = color_obstacles[0]
+
+    def rect_obst_collision(self, b: Ball):
+        if self.x - b.radius <= b.x <= self.x + self.width and b.y <= self.y + self.height + b.radius:
+            return True
+
+
 class Obstacle:
     def __init__(self, vector: Vector, color):
         self.x = vector.x
@@ -118,20 +148,22 @@ class Obstacle:
     #     return distance < 20
 
     def get_strength(self):
-        if self.y == 60:
+        if self.y == 80:
             self.strength = 3
-            self.color = 'red'
-        elif self.y == 95:
+            self.color = color_obstacles[2]
+        elif self.y == 115:
             self.strength = 2
-            self.color = 'orange'
-        elif self.y == 130:
+            self.color = color_obstacles[1]
+        elif self.y == 150:
             self.strength = 1
-            self.color = 'yellow'
+            self.color = color_obstacles[0]
 
 
 ball = Ball()
-obstacles = []
+circle_obstacles = []
+rect_obstacles = []
 color_obstacles = ['yellow', 'orange', 'red']
+color_rect = ['red', 'yellow']
 
 
 class Hearts:
@@ -163,6 +195,12 @@ def add_obstacles(color, obs, row):
     return set(obs)
 
 
+def add_rect_obstacles(color, obs, row):
+    for obs_num in range(15):
+        obs.append(RectObstacle(row, color))
+        row += Vector(60, 0)
+    return set(obs)
+
 def on_mouse_move(pos):
     paddle.where_to(pos)
 
@@ -171,10 +209,13 @@ def draw():
     screen.clear()
     paddle.draw()
     ball.draw()
+    # rect_o.draw()
     for HEART in hearts:
         HEART.draw()
-    for obstacle in obstacles:
+    for obstacle in circle_obstacles:
         obstacle.draw()
+    for obst in rect_obstacles:
+        obst.draw()
 
 
 white = (255, 255, 255)
@@ -195,7 +236,7 @@ def message_display(text):
 
 
 def check_win():
-    if len(obstacles) == 0 and len(hearts) != 0:
+    if len(circle_obstacles) == 0 and len(hearts) != 0:
         message_display("You Win!")
         quit()
     if len(hearts) == 0:
@@ -214,25 +255,42 @@ def update(dt):
     ball.paddle_collision()
     ball.check_ball_fall(dt)
     check_win()
-    for obstacle in obstacles:
+    for obstacle in circle_obstacles:
         distance = (ball.position - obstacle.position).magnitude()
         if distance < 25:
             if obstacle.strength != 1:
                 obstacle.strength -= 1
                 obstacle.color = color_obstacles[obstacle.strength - 1]
             else:
-                obstacles.remove(obstacle)
+                circle_obstacles.remove(obstacle)
 
             ball.speedY *= -1
-            ball.speedX *= -1  # ????
+
+    for rect in rect_obstacles:
+        if rect.rect_obst_collision(ball):
+            if rect.strength != 1:
+                rect.strength -= 1
+                rect.color = color_obstacles[rect.strength - 1]
+            else:
+                rect_obstacles.remove(rect)
+
+            ball.speedY *= -1
 
 
-row_vector = Vector(20, 60)
+row_circle = Vector(20, 80)
 for colour in color_obstacles:
-    add_obstacles(colour, obstacles, row_vector)
-    row_vector += Vector(0, 35)
+    add_obstacles(colour, circle_obstacles, row_circle)
+    row_circle += Vector(0, 35)
 
-for obst in obstacles:
+for obst in circle_obstacles:
     obst.get_strength()
+
+row_rect = Vector(5, 45)
+for colour in color_rect:
+    add_rect_obstacles(colour, rect_obstacles, row_rect)
+    row_rect += Vector(0, 125)
+
+for rect_o in rect_obstacles:
+    rect_o.get_strength()
 
 pgzrun.go()
