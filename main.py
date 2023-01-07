@@ -178,6 +178,27 @@ class Hearts:
         self.actor.height = y
 
 
+class BonusHearts:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.actor = Actor("heart", center=(x, y))
+        self.actor.width = 30
+        self.actor.height = 29
+
+    def move(self):
+        # self.position += self.velocity
+        self.y += 2
+        self.actor = Actor("heart", center=(self.x, self.y))
+
+    def draw(self):
+        self.actor.draw()
+
+    def touches_paddle(self, p: Paddle):
+        if p.x - self.actor.width <= self.x <= p.x + p.width + self.actor.width and self.y >= p.y - self.actor.height:
+            return True
+
+
 hearts = []
 for i in range(3):
     if i == 0:
@@ -201,8 +222,12 @@ def add_rect_obstacles(color, obs, row):
         row += Vector(60, 0)
     return set(obs)
 
+
 def on_mouse_move(pos):
     paddle.where_to(pos)
+
+
+bonus_hearts = []
 
 
 def draw():
@@ -216,6 +241,8 @@ def draw():
         obstacle.draw()
     for obst in rect_obstacles:
         obst.draw()
+    for bonus in bonus_hearts:
+        bonus.draw()
 
 
 white = (255, 255, 255)
@@ -275,6 +302,21 @@ def update(dt):
                 rect_obstacles.remove(rect)
 
             ball.speedY *= -1
+
+    if random.random() < 0.005:
+        bonus_hearts.append(BonusHearts(random.randint(0, WIDTH), -30))
+    for bonus in bonus_hearts:
+        bonus.move()
+        if bonus.touches_paddle(paddle):
+            bonus_hearts.remove(bonus)
+            if len(hearts) == 1:
+                hearts.append(Hearts(45, 20))
+
+            elif len(hearts) == 2:
+                hearts.append(Hearts(75, 20))
+                
+            elif len(hearts) == 3:
+                continue
 
 
 row_circle = Vector(20, 80)
