@@ -199,6 +199,24 @@ class BonusHearts:
             return True
 
 
+class BonusLength:
+    def __init__(self, pos: Vector):
+        self.position = pos
+        self.start_time = None
+        self.velocity = Vector(0, 2)
+        self.radius = 10
+
+    def move(self):
+        self.position += self.velocity
+
+    def draw(self):
+        screen.draw.filled_circle((self.position.x, self.position.y), self.radius, "yellow")
+
+    def touches_paddle(self, p: Paddle):
+        if p.x - self.radius <= self.position.x <= p.x + p.width + self.radius and self.position.y > p.y - self.radius:
+            return True
+
+
 hearts = []
 for i in range(3):
     if i == 0:
@@ -243,6 +261,8 @@ def draw():
         obst.draw()
     for bonus in bonus_hearts:
         bonus.draw()
+    for bonus in length_bonuses:
+        bonus.draw()
 
 
 white = (255, 255, 255)
@@ -276,6 +296,10 @@ def check_win():
         quit()
 
 
+active_length_bonuses = []
+length_bonuses = []
+
+
 def update(dt):
     paddle.update(dt)
     ball.update(dt)
@@ -303,7 +327,7 @@ def update(dt):
 
             ball.speedY *= -1
 
-    if random.random() < 0.005:
+    if random.random() < 0.0001:
         bonus_hearts.append(BonusHearts(random.randint(0, WIDTH), -30))
     for bonus in bonus_hearts:
         bonus.move()
@@ -314,9 +338,30 @@ def update(dt):
 
             elif len(hearts) == 2:
                 hearts.append(Hearts(75, 20))
+
+            # elif len(hearts) == 3:
+            #     continue
                 
-            elif len(hearts) == 3:
-                continue
+        elif bonus.y > HEIGHT:
+            length_bonuses.remove(bonus)
+
+    if random.random() < 0.0001:
+        length_bonuses.append(BonusLength(Vector(random.randint(0, WIDTH), -10)))
+    for bonus in length_bonuses:
+        bonus.move()
+        if bonus.touches_paddle(paddle):
+            length_bonuses.remove(bonus)
+            bonus.start_time = time.time()
+            active_length_bonuses.append(bonus)
+
+            paddle.width *= 1.5
+        elif bonus.position.y > HEIGHT:
+            length_bonuses.remove(bonus)
+
+    for bonus in active_length_bonuses:
+        if time.time() - bonus.start_time > 5:
+            active_length_bonuses.remove(bonus)
+            paddle.width /= 1.5
 
 
 row_circle = Vector(20, 80)
