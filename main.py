@@ -102,6 +102,7 @@ class RectObstacle:
         pygame.draw.rect(surface, self.color, self.rectangle)
 
     def get_strength(self):
+        # giving each rectangle a strength according to its position
         if self.y == 45:
             self.strength = 3
             self.color = color_obstacles[2]
@@ -111,11 +112,12 @@ class RectObstacle:
             self.color = color_obstacles[0]
 
     def rect_obst_collision(self, b: Ball):
+        # checking if ball hits the obstacle
         if self.x - b.radius <= b.x <= self.x + self.width and b.y <= self.y + self.height + b.radius:
             return True
 
 
-class Obstacle:
+class CircleObstacle:
     def __init__(self, vector: Vector, color):
         self.x = vector.x
         self.y = vector.y
@@ -128,6 +130,7 @@ class Obstacle:
         pygame.draw.circle(surface, self.color, (self.x, self.y), self.radius)
 
     def get_strength(self):
+        # giving each obstacle a strength according to its positions
         if self.y == 80:
             self.strength = 3
             self.color = color_obstacles[2]
@@ -160,6 +163,7 @@ class BonusHearts:
         self.actor.height = 29
 
     def move(self):
+        # moving the bonus down
         self.y += 2
         self.actor = Actor("heart", center=(self.x, self.y))
 
@@ -167,6 +171,7 @@ class BonusHearts:
         self.actor.draw()
 
     def touches_paddle(self, p: Paddle):
+        # checking if player catches the bonus
         if p.x - self.actor.width <= self.x <= p.x + p.width + self.actor.width and self.y >= p.y - self.actor.height:
             return True
 
@@ -179,24 +184,28 @@ class BonusLength:
         self.radius = 10
 
     def move(self):
+        # moving the bonus downwards
         self.position += self.velocity
 
     def draw(self):
         screen.draw.filled_circle((self.position.x, self.position.y), self.radius, "gold2")
 
     def touches_paddle(self, p: Paddle):
+        # checking if player catches the bonus
         if p.x - self.radius <= self.position.x <= p.x + p.width + self.radius and self.position.y > p.y - self.radius:
             return True
 
 
 def add_obstacles(color, obs, row):
+    # creating rows of round obstacles
     for obs_num in range(15):
-        obs.append(Obstacle(row, color))
+        obs.append(CircleObstacle(row, color))
         row += Vector(40, 0)
     return set(obs)
 
 
 def add_rect_obstacles(color, obs, row):
+    # creating rows of rectangular obstacles
     for obs_num in range(10):
         obs.append(RectObstacle(row, color))
         row += Vector(60, 0)
@@ -204,6 +213,7 @@ def add_rect_obstacles(color, obs, row):
 
 
 def on_mouse_move(pos):
+    # getting the position of the mouse
     paddle.where_to(pos)
 
 
@@ -275,14 +285,17 @@ def update(dt):
     ball.check_ball_fall(dt)
     check_win()
     for obstacle in circle_obstacles:
+        # checking if ball touches the round obstacle
         distance = (ball.position - obstacle.position).magnitude()
         if distance < 25:
             if obstacle.strength != 1:
+                # making obstacles 'weaker' and changing their color according to strength
                 obstacle.strength -= 1
                 obstacle.color = color_obstacles[obstacle.strength - 1]
             else:
                 circle_obstacles.remove(obstacle)
 
+            # changing the y-direction of the ball
             ball.speedY *= -1
 
     for rect in rect_obstacles:
@@ -295,6 +308,7 @@ def update(dt):
 
             ball.speedY *= -1
 
+    # randomly generating bonuses
     if random.random() < 0.0005:
         bonus_hearts.append(BonusHearts(random.randint(0, WIDTH), -30))
         length_bonuses.append(BonusLength(Vector(random.randint(0, WIDTH), -10)))
@@ -331,6 +345,7 @@ def update(dt):
             paddle.width /= 1.5
 
 
+# creating obstacles and assigning them their strengths
 row_circle = Vector(20, 80)
 for colour in color_obstacles:
     add_obstacles(colour, circle_obstacles, row_circle)
