@@ -182,14 +182,14 @@ class BonusLength:
 
 
 def add_obstacles(color, obs, row):
-    for obs_num in range(21):
+    for obs_num in range(15):
         obs.append(Obstacle(row, color))
         row += Vector(40, 0)
     return set(obs)
 
 
 def add_rect_obstacles(color, obs, row):
-    for obs_num in range(15):
+    for obs_num in range(10):
         obs.append(RectObstacle(row, color))
         row += Vector(60, 0)
     return set(obs)
