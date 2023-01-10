@@ -4,28 +4,11 @@ import pgzrun
 import time
 from pgzero.actor import Actor
 import pygame
+from vector import Vector
 
 WIDTH = 600
 HEIGHT = 400
 surface = pygame.display.set_mode((WIDTH, HEIGHT))
-
-
-class Vector:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __sub__(self, other):
-        return Vector(self.x - other.x, self.y - other.y)
-
-    def __add__(self, other):
-        return Vector(self.x + other.x, self.y + other.y)
-
-    def __str__(self):
-        return f'({self.x}, {self.y})'
-
-    def magnitude(self):
-        return math.sqrt(self.x ** 2 + self.y ** 2)
 
 
 class Paddle:
@@ -54,9 +37,6 @@ class Paddle:
         if self.goal.x > WIDTH - self.width / 2:  # > 540
             self.x = WIDTH - self.width  # = 480
         self.rectangle = pygame.Rect(self.x, self.y, self.width, self.height)
-
-
-paddle = Paddle()
 
 
 class Ball:
@@ -104,7 +84,6 @@ class RectObstacle:
     def __init__(self, vector: Vector, color):
         self.x = vector.x
         self.y = vector.y
-        self.position = vector
         self.color = color
         self.width = 50
         self.height = 15
@@ -118,9 +97,7 @@ class RectObstacle:
         if self.y == 45:
             self.strength = 3
             self.color = color_obstacles[2]
-        # elif self.y == 115:
-        #     self.strength = 2
-        #     self.color = color_obstacles[1]
+
         elif self.y == 170:
             self.strength = 1
             self.color = color_obstacles[0]
@@ -137,15 +114,10 @@ class Obstacle:
         self.position = vector
         self.radius = 15
         self.color = color
-        self.o_dict = {}
         self.strength = 0
 
     def draw(self):
         pygame.draw.circle(surface, self.color, (self.x, self.y), self.radius)
-
-    # def touched_ball(self, b: Ball):
-    #     distance = (b.position - self.position).magnitude()
-    #     return distance < 20
 
     def get_strength(self):
         if self.y == 80:
@@ -157,13 +129,6 @@ class Obstacle:
         elif self.y == 150:
             self.strength = 1
             self.color = color_obstacles[0]
-
-
-ball = Ball()
-circle_obstacles = []
-rect_obstacles = []
-color_obstacles = ['yellow', 'orange', 'red']
-color_rect = ['red', 'yellow']
 
 
 class Hearts:
@@ -187,7 +152,6 @@ class BonusHearts:
         self.actor.height = 29
 
     def move(self):
-        # self.position += self.velocity
         self.y += 2
         self.actor = Actor("heart", center=(self.x, self.y))
 
@@ -217,16 +181,6 @@ class BonusLength:
             return True
 
 
-hearts = []
-for i in range(3):
-    if i == 0:
-        hearts.append(Hearts(15, 20))
-    if i == 1:
-        hearts.append(Hearts(45, 20))
-    if i == 2:
-        hearts.append(Hearts(75, 20))
-
-
 def add_obstacles(color, obs, row):
     for obs_num in range(21):
         obs.append(Obstacle(row, color))
@@ -245,27 +199,20 @@ def on_mouse_move(pos):
     paddle.where_to(pos)
 
 
-bonus_hearts = []
-
-
 def draw():
     screen.clear()
     paddle.draw()
     ball.draw()
-    # rect_o.draw()
     for HEART in hearts:
         HEART.draw()
     for obstacle in circle_obstacles:
         obstacle.draw()
-    for obst in rect_obstacles:
-        obst.draw()
+    for obstacle in rect_obstacles:
+        obstacle.draw()
     for bonus in bonus_hearts:
         bonus.draw()
     for bonus in length_bonuses:
         bonus.draw()
-
-
-white = (255, 255, 255)
 
 
 def text_objects(text, font):
@@ -283,21 +230,34 @@ def message_display(text):
 
 
 def check_win():
-    if len(circle_obstacles) == 0 and len(hearts) != 0:
+    if len(circle_obstacles) == 0 and len(rect_obstacles) == 0 and len(hearts) != 0:
         message_display("You Win!")
         quit()
     if len(hearts) == 0:
-        # font2 = pygame.font.SysFont('didot.ttc', 72)
-        # img2 = font2.render('You Lose', True, white)
-        # surface.blit(img2, (200, 200))
-        # pygame.display.update()
-        # time.sleep(2)
         message_display("You Lose!")
         quit()
 
 
 active_length_bonuses = []
 length_bonuses = []
+white = (255, 255, 255)
+bonus_hearts = []
+ball = Ball()
+circle_obstacles = []
+rect_obstacles = []
+color_obstacles = ['yellow', 'orange', 'red']
+color_rect = ['red', 'yellow']
+paddle = Paddle()
+
+hearts = []
+
+for i in range(3):
+    if i == 0:
+        hearts.append(Hearts(15, 20))
+    if i == 1:
+        hearts.append(Hearts(45, 20))
+    if i == 2:
+        hearts.append(Hearts(75, 20))
 
 
 def update(dt):
@@ -329,6 +289,9 @@ def update(dt):
 
     if random.random() < 0.0001:
         bonus_hearts.append(BonusHearts(random.randint(0, WIDTH), -30))
+        length_bonuses.append(BonusLength(Vector(random.randint(0, WIDTH), -10)))
+
+    # actions for heart bonuses
     for bonus in bonus_hearts:
         bonus.move()
         if bonus.touches_paddle(paddle):
@@ -339,28 +302,24 @@ def update(dt):
             elif len(hearts) == 2:
                 hearts.append(Hearts(75, 20))
 
-            # elif len(hearts) == 3:
-            #     continue
-                
         elif bonus.y > HEIGHT:
             length_bonuses.remove(bonus)
 
-    if random.random() < 0.0001:
-        length_bonuses.append(BonusLength(Vector(random.randint(0, WIDTH), -10)))
-    for bonus in length_bonuses:
-        bonus.move()
-        if bonus.touches_paddle(paddle):
-            length_bonuses.remove(bonus)
-            bonus.start_time = time.time()
-            active_length_bonuses.append(bonus)
+    # actions for length bonuses
+    for bonus_l in length_bonuses:
+        bonus_l.move()
+        if bonus_l.touches_paddle(paddle):
+            length_bonuses.remove(bonus_l)
+            bonus_l.start_time = time.time()
+            active_length_bonuses.append(bonus_l)
 
             paddle.width *= 1.5
-        elif bonus.position.y > HEIGHT:
-            length_bonuses.remove(bonus)
+        elif bonus_l.position.y > HEIGHT:
+            length_bonuses.remove(bonus_l)
 
-    for bonus in active_length_bonuses:
-        if time.time() - bonus.start_time > 5:
-            active_length_bonuses.remove(bonus)
+    for bonus_l in active_length_bonuses:
+        if time.time() - bonus_l.start_time > 5:
+            active_length_bonuses.remove(bonus_l)
             paddle.width /= 1.5
 
 
