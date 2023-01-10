@@ -303,7 +303,7 @@ def update(dt):
                 hearts.append(Hearts(75, 20))
 
         elif bonus.y > HEIGHT:
-            length_bonuses.remove(bonus)
+            bonus_hearts.remove(bonus)
 
     # actions for length bonuses
     for bonus_l in length_bonuses:
