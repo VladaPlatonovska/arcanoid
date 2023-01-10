@@ -56,19 +56,26 @@ class Ball:
         pygame.draw.circle(surface, 'lavenderblush2', (self.x, self.y), self.radius)
 
     def paddle_collision(self):
+        # checking the ball touches the paddle by x and y
         if paddle.x - self.radius <= self.x <= paddle.x + paddle.width and self.y >= paddle.y - self.radius:
+            # change the direction of the ball
             self.speedY *= -1
 
     def update(self, dt):
         self.x -= self.speedX
         self.y -= self.speedY
         self.position = Vector(self.x, self.y)
+        # check if the ball touches left or right side
         if self.x >= WIDTH - self.radius or self.x <= self.radius:
+            # change the direction of the ball
             self.speedX *= -1
+        # check if the ball touches the upper wall
         if self.y >= HEIGHT or self.y <= 0:
+            # change the direction of the ball
             self.speedY *= -1
 
     def check_ball_fall(self, dt):
+        #check if the ball fall down
         if ball.y == 390:
             hearts.pop()
             self.speedY *= -1
@@ -77,6 +84,7 @@ class Ball:
             self.x -= self.speedX
             self.y -= self.speedY
             self.position = Vector(self.x, self.y)
+            # delay the time of renewing the game
             time.sleep(1)
 
 
