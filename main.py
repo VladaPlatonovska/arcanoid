@@ -26,7 +26,7 @@ class Paddle:
         self.goal = Vector(pos[0], self.y)
 
     def draw(self):
-        pygame.draw.rect(surface, 'cyan', self.rectangle)
+        pygame.draw.rect(surface, 'cadetblue3', self.rectangle)
 
     def update(self, dt):
         # moving the paddle
@@ -53,7 +53,7 @@ class Ball:
         self.ball = pygame.Rect(self.x, self.y, self.radius, self.speedX)
 
     def draw(self):
-        pygame.draw.circle(surface, 'white', (self.x, self.y), self.radius)
+        pygame.draw.circle(surface, 'lavenderblush2', (self.x, self.y), self.radius)
 
     def paddle_collision(self):
         if paddle.x - self.radius <= self.x <= paddle.x + paddle.width and self.y >= paddle.y - self.radius:
@@ -63,7 +63,7 @@ class Ball:
         self.x -= self.speedX
         self.y -= self.speedY
         self.position = Vector(self.x, self.y)
-        if self.x >= WIDTH or self.x <= 0:
+        if self.x >= WIDTH - self.radius or self.x <= self.radius:
             self.speedX *= -1
         if self.y >= HEIGHT or self.y <= 0:
             self.speedY *= -1
@@ -174,7 +174,7 @@ class BonusLength:
         self.position += self.velocity
 
     def draw(self):
-        screen.draw.filled_circle((self.position.x, self.position.y), self.radius, "yellow")
+        screen.draw.filled_circle((self.position.x, self.position.y), self.radius, "gold2")
 
     def touches_paddle(self, p: Paddle):
         if p.x - self.radius <= self.position.x <= p.x + p.width + self.radius and self.position.y > p.y - self.radius:
@@ -245,8 +245,8 @@ bonus_hearts = []
 ball = Ball()
 circle_obstacles = []
 rect_obstacles = []
-color_obstacles = ['yellow', 'orange', 'red']
-color_rect = ['red', 'yellow']
+color_obstacles = ['yellow1', 'orange', 'red2']
+color_rect = ['red2', 'yellow1']
 paddle = Paddle()
 
 hearts = []
@@ -287,7 +287,7 @@ def update(dt):
 
             ball.speedY *= -1
 
-    if random.random() < 0.0001:
+    if random.random() < 0.0005:
         bonus_hearts.append(BonusHearts(random.randint(0, WIDTH), -30))
         length_bonuses.append(BonusLength(Vector(random.randint(0, WIDTH), -10)))
 
